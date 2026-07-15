@@ -187,6 +187,59 @@
         #outVitals { left: 8%;  top: 32.0%; font-size: 4.0cqw; line-height: 1.8; }
         #outMeds   { left: 45%; top: 32.0%; font-size: 4.3cqw; line-height: 2.1; }
 
+        /* Safe Mobile Preview Modal (Zero-Crash Download Bypass) */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            box-sizing: border-box;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: contain;
+            -webkit-user-select: contain;
+        }
+
+        .modal-content {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+            display: block;
+            user-select: auto !important;
+            -webkit-user-select: auto !important;
+        }
+
+        .modal-instructions {
+            color: #fff;
+            text-align: center;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 500px;
+        }
+
+        .btn-close-modal {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            flex: none;
+            width: auto;
+        }
+
         @media print {
             @page {
                 size: A4 portrait;
@@ -200,7 +253,7 @@
                 height: 100% !important;
                 overflow: hidden !important;
             }
-            .editor-container {
+            .editor-container, .image-modal {
                 display: none !important;
             }
             .prescription-wrapper {
@@ -303,7 +356,7 @@
             <div class="btn-group">
                 <button type="submit" class="btn-update">Update Text</button>
                 <div class="btn-row">
-                    <button type="button" class="btn-download" onclick="downloadPrescription()">Save to Phone</button>
+                    <button type="button" class="btn-download" onclick="generatePrescriptionImage()">Save to Phone</button>
                     <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
                 </div>
             </div>
@@ -320,6 +373,15 @@
         <div id="outDate" class="overlay draggable"></div>
         <div id="outVitals" class="overlay draggable"></div>
         <div id="outMeds" class="overlay draggable"></div>
+    </div>
+
+    <div id="downloadModal" class="image-modal">
+        <div class="modal-instructions">
+            📸 <strong>Ready to Save!</strong><br>
+            <strong>Press and hold (long-press)</strong> on the image below, then tap <strong>"Download Image"</strong> or <strong>"Save Image"</strong> to save it directly to your Gallery.
+        </div>
+        <img id="modalImage" class="modal-content" alt="Prescription Output">
+        <button class="btn-close-modal" onclick="closeModal()">Go Back</button>
     </div>
 
     <script>
@@ -371,7 +433,7 @@
             document.getElementById("outMeds").style.fontSize = (parsedVal - 0.9) + "cqw";
         }
 
-        function downloadPrescription() {
+        function generatePrescriptionImage() {
             const container = document.getElementById('previewWrapper');
             
             const hasBg = container.style.backgroundImage !== '';
@@ -380,7 +442,7 @@
                 return;
             }
 
-            // Temporarily hide dotted border outline on elements during capture
+            // Temporarily hide border outline on elements during capture
             const overlays = document.querySelectorAll('.overlay');
             overlays.forEach(el => {
                 el.style.border = 'none';
@@ -388,25 +450,30 @@
 
             html2canvas(container, {
                 useCORS: true,
-                scale: 3, // High-quality rendering output
+                scale: 3, // High resolution rendering
                 backgroundColor: null
             }).then(canvas => {
-                const link = document.createElement('a');
-                const patientName = document.getElementById("inName").value.trim() || "patient";
-                link.download = `Prescription_${patientName}.png`;
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                const imgData = canvas.toDataURL('image/png');
                 
-                // Restore original styling for editing
+                // Set the rendered image inside our popup modal
+                const modalImg = document.getElementById('modalImage');
+                modalImg.src = imgData;
+
+                // Show the modal
+                document.getElementById('downloadModal').style.display = 'flex';
+                
+                // Restore original editing styles on template
                 overlays.forEach(el => {
                     el.style.border = '1px dashed transparent';
                 });
             }).catch(err => {
                 console.error("Canvas export failed: ", err);
-                alert("Failed to render prescription image.");
+                alert("Failed to process your image.");
             });
+        }
+
+        function closeModal() {
+            document.getElementById('downloadModal').style.display = 'none';
         }
 
         function initDragAndDrop() {
