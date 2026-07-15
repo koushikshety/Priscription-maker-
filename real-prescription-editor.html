@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koushik Clinic - Drag & Drop Prescription Editor</title>
+    <title>Koushik Clinic - Fullscreen Prescription Canvas</title>
     <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Herr+Von+Muellerhoff&family=Over+the+Rainbow&family=League+Script&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -13,8 +13,10 @@
             --primary-color: #e0533c;
             --blue-ink: #102a73;
             --green-color: #2ecc71;
-            --whatsapp-color: #25d366;
-            --download-color: #3182ce;
+            --dark-bg: #2d3748;
+            --notice-bg: #fff5f5;
+            --notice-border: #feb2b2;
+            --notice-text: #c53030;
         }
 
         body {
@@ -26,6 +28,51 @@
             flex-direction: column;
             align-items: center;
             user-select: none;
+        }
+
+        /* App Wrapper Issue Notice Bar Styling */
+        .wrapper-notice-bar {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--notice-bg);
+            border: 1px solid var(--notice-border);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-align: center;
+        }
+
+        .wrapper-notice-bar p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--notice-text);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .btn-notice-redirect {
+            background-color: var(--notice-text);
+            color: white;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-notice-redirect:hover {
+            background-color: #9b2c2c;
         }
 
         .editor-container {
@@ -124,27 +171,14 @@
             color: white;
         }
 
-        .btn-share {
-            background-color: var(--whatsapp-color);
-            color: white;
-        }
-
-        .btn-download {
-            background-color: var(--download-color);
+        .btn-render {
+            background-color: var(--green-color);
             color: white;
         }
 
         .btn-print {
-            background-color: #2d3748;
+            background-color: var(--dark-bg);
             color: white;
-        }
-
-        .bypass-box {
-            background-color: #edf2f7;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 5px;
-            border: 1px solid #cbd5e0;
         }
 
         .prescription-wrapper {
@@ -204,55 +238,57 @@
         #outVitals { left: 8%;  top: 32.0%; font-size: 4.0cqw; line-height: 1.8; }
         #outMeds   { left: 45%; top: 32.0%; font-size: 4.3cqw; line-height: 2.1; }
 
-        .image-modal {
+        /* Fullscreen Layout Snapshot Container Styles */
+        .fullscreen-snapshot-view {
             display: none;
             position: fixed;
-            z-index: 9999;
+            z-index: 99999;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.95);
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
             box-sizing: border-box;
-            padding: 15px;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            overflow-y: auto;
         }
 
-        .modal-content {
+        .snapshot-top-instructions {
+            width: 100%;
+            background: #1a202c;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-sizing: border-box;
+        }
+
+        .snapshot-image-display {
+            width: 100%;
             max-width: 100%;
-            max-height: 70vh;
-            border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-bottom: 15px;
+            height: auto;
             display: block;
         }
 
-        .modal-instructions {
-            color: #fff;
-            text-align: center;
-            font-size: 0.95rem;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            background: rgba(255,255,255,0.15);
-            padding: 10px;
-            border-radius: 8px;
-            max-width: 500px;
-        }
-
-        .btn-close-modal {
+        .btn-dismiss-snapshot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background-color: var(--primary-color);
             color: white;
-            padding: 12px 30px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
             font-weight: bold;
-            font-size: 1rem;
             width: auto;
         }
 
         @media print {
-            .editor-container, .image-modal { display: none !important; }
+            .wrapper-notice-bar, .editor-container, .fullscreen-snapshot-view, .btn-dismiss-snapshot { display: none !important; }
             .prescription-wrapper {
                 box-shadow: none !important;
                 border-radius: 0 !important;
@@ -265,6 +301,13 @@
     </style>
 </head>
 <body>
+
+    <div class="wrapper-notice-bar">
+        <p>⚠️ <strong>App Error or Layout Glitch?</strong> If sharing, loading, or editing features freeze inside your application wrapper, click below to open the tool safely in your device browser.</p>
+        <a href="https://koushikshety.github.io/Priscription-maker-/real-prescription-editor.html" target="_blank" class="btn-notice-redirect">
+            🌐 Open in Main Website Browser
+        </a>
+    </div>
 
     <div class="editor-container">
         <h2>Koushik Clinic Assistant</h2>
@@ -291,6 +334,7 @@
                         <select id="fontSelect" onchange="changeFont(this.value)">
                             <option value="'Reenie Beanie', cursive">Fast Clinical Script</option>
                             <option value="'Nothing You Could Do', cursive">Relaxed Blue Ink</option>
+                            <option value="'Over the Rainbow', cursive">Compact Felt Tip Pen</option>
                         </select>
                     </div>
                 </div>
@@ -301,25 +345,19 @@
             <div class="form-group"><label>Treatment / Rx (Right Side)</label><textarea id="inMeds">1. Tab. Clavam 625 mg&#10;   1 - 0 - 1  x 5 days</textarea></div>
 
             <div class="btn-group">
-                <button type="submit" class="btn-update">Update Layout Elements</button>
+                <button type="submit" class="btn-update">Update Text Positions</button>
                 <div class="btn-row">
-                    <button type="button" class="btn-download" onclick="triggerPrescriptionDownload()">
-                        📥 Download File
+                    <button type="button" class="btn-render" onclick="openCleanFullscreenSnapshot()">
+                        📸 Full-Screen Screenshot Mode
                     </button>
-                    <button type="button" class="btn-print" onclick="window.print()">Print / PDF</button>
-                </div>
-                
-                <div class="bypass-box">
-                    <button type="button" style="background-color: #4a5568; color: white; padding: 10px;" onclick="redirectToExternalBrowser()">
-                        🌐 Safe App Browser Redirect Bypass
-                    </button>
+                    <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
                 </div>
             </div>
         </form>
     </div>
 
     <div class="prescription-wrapper" id="previewWrapper">
-        <div class="placeholder-text" id="placeholderText">Please upload your background sheet template to begin.</div>
+        <div class="placeholder-text" id="placeholderText">Please upload your background sheet template to begin layout mapping.</div>
         <div id="outName" class="overlay draggable"></div>
         <div id="outAge" class="overlay draggable"></div>
         <div id="outSex" class="overlay draggable"></div>
@@ -328,50 +366,20 @@
         <div id="outMeds" class="overlay draggable"></div>
     </div>
 
-    <div id="downloadModal" class="image-modal">
-        <div class="modal-instructions">
-            🎉 <strong>Prescription Document Rendered!</strong><br>
-            If using the native wrapper application, <strong>long-press (hold your finger down)</strong> on the prescription image layer below to click <strong>"Save Image"</strong> directly to your phone's photos.
+    <div id="snapshotModal" class="fullscreen-snapshot-view">
+        <div class="snapshot-top-instructions">
+            📸 FULLSCREEN READY: Capture your device screenshot now.
         </div>
-        <img id="modalImage" class="modal-content" alt="Prescription Sheet">
-        <button class="btn-close-modal" onclick="closeModal()">Return to Editor</button>
+        <img id="cleanRenderOutput" class="snapshot-image-display" alt="Prescription Ready for Screenshot">
+        <button class="btn-dismiss-snapshot" onclick="closeSnapshotView()">✕ Close</button>
     </div>
 
     <script>
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('rxData')) { loadStateFromUrl(urlParams.get('rxData')); }
-            else {
-                const today = new Date();
-                document.getElementById("inDate").value = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
-            }
+            const today = new Date();
+            document.getElementById("inDate").value = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
             initDragAndDrop();
         };
-
-        function getSerializedState() {
-            return btoa(unescape(encodeURIComponent(JSON.stringify({
-                n: document.getElementById("inName").value, a: document.getElementById("inAge").value,
-                s: document.getElementById("inSex").value, d: document.getElementById("inDate").value,
-                v: document.getElementById("inVitals").value, m: document.getElementById("inMeds").value,
-                f: document.getElementById("fontSelect").value, sz: document.getElementById("fontSizeSlider").value
-            }))));
-        }
-
-        function loadStateFromUrl(encodedData) {
-            try {
-                const data = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
-                document.getElementById("inName").value = data.n; document.getElementById("inAge").value = data.a;
-                document.getElementById("inSex").value = data.s; document.getElementById("inDate").value = data.d;
-                document.getElementById("inVitals").value = data.v; document.getElementById("inMeds").value = data.m;
-                document.getElementById('placeholderText').style.display = 'none';
-                document.querySelectorAll('.overlay').forEach(el => el.style.display = 'block');
-                updatePrescription();
-            } catch(e) { console.error(e); }
-        }
-
-        function redirectToExternalBrowser() {
-            window.location.href = `${window.location.href.split('?')[0]}?rxData=${getSerializedState()}`;
-        }
 
         function loadImage(event) {
             const reader = new FileReader();
@@ -396,48 +404,54 @@
         function changeFont(f) { document.querySelectorAll('.overlay').forEach(el => el.style.fontFamily = f); }
         function changeFontSize(v) { document.querySelectorAll('.overlay').forEach(el => el.style.fontSize = v + "cqw"); }
 
-        function triggerPrescriptionDownload() {
-            const container = document.getElementById('previewWrapper');
-            if(container.style.backgroundImage === '') { alert("Upload a template image first!"); return; }
+        function openCleanFullscreenSnapshot() {
+            const wrapper = document.getElementById('previewWrapper');
+            if(wrapper.style.backgroundImage === '') { 
+                alert("Please add a background prescription canvas template image to proceed."); 
+                return; 
+            }
 
+            // Hide guidelines temporarily to give a clean screenshot printout
             document.querySelectorAll('.overlay').forEach(el => el.style.border = 'none');
 
-            html2canvas(container, { scale: 2.5 }).then(canvas => {
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            html2canvas(wrapper, {
+                useCORS: true,
+                scale: 3, // Multiplies canvas texture details for a sharper image output
+                backgroundColor: null
+            }).then(canvas => {
+                const clearImageDataUrl = canvas.toDataURL('image/jpeg', 1.0);
                 
-                // Native Web Fallback Trigger
-                const testAnchor = document.createElement('a');
-                testAnchor.href = imgData;
-                testAnchor.download = `Prescription_${Date.now()}.jpg`;
-                document.body.appendChild(testAnchor);
-                testAnchor.click();
-                document.body.removeChild(testAnchor);
-
-                // Wrapper Safety Modal popup view fallback
-                document.getElementById('modalImage').src = imgData;
-                document.getElementById('downloadModal').style.display = 'flex';
+                document.getElementById('cleanRenderOutput').src = clearImageDataUrl;
+                document.getElementById('snapshotModal').style.display = 'flex';
+                
+                // Restore configuration outlines back safely inside workspace card
                 document.querySelectorAll('.overlay').forEach(el => el.style.border = '1px dashed transparent');
             });
         }
 
-        function closeModal() { document.getElementById('downloadModal').style.display = 'none'; }
+        function closeSnapshotView() {
+            document.getElementById('snapshotModal').style.display = 'none';
+        }
 
         function initDragAndDrop() {
             document.querySelectorAll('.draggable').forEach(el => {
                 let isDragging = false; let startX, startY, initialLeft, initialTop;
+                
                 const startDrag = (e) => {
                     isDragging = true; const ev = e.touches ? e.touches[0] : e;
                     startX = ev.clientX; startY = ev.clientY;
                     initialLeft = el.offsetLeft; initialTop = el.offsetTop;
                     document.addEventListener('mousemove', dragMove); document.addEventListener('touchmove', dragMove, {passive:false});
                 };
+                
                 const dragMove = (e) => {
                     if (!isDragging) return; e.preventDefault();
                     const ev = e.touches ? e.touches[0] : e;
-                    const wrapper = document.getElementById('previewWrapper');
-                    el.style.left = ((initialLeft + (ev.clientX - startX)) / wrapper.offsetWidth * 100) + '%';
-                    el.style.top = ((initialTop + (ev.clientY - startY)) / wrapper.offsetHeight * 100) + '%';
+                    const container = document.getElementById('previewWrapper');
+                    el.style.left = ((initialLeft + (ev.clientX - startX)) / container.offsetWidth * 100) + '%';
+                    el.style.top = ((initialTop + (ev.clientY - startY)) / container.offsetHeight * 100) + '%';
                 };
+                
                 el.addEventListener('mousedown', startDrag); el.addEventListener('touchstart', startDrag, {passive:false});
             });
         }
