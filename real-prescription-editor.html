@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koushik Clinic - Stable Prescription Editor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Herr+Von+Muellerhoff&family=Over+the+Rainbow&family=League+Script&display=swap" rel="stylesheet">
-    
+    <title>Koushik Clinic - WebView Compatible</title>
     <style>
         :root {
             --primary-color: #e0533c;
@@ -14,7 +12,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f3f4f6;
             margin: 0;
             padding: 10px;
@@ -22,11 +20,12 @@
             flex-direction: column;
             align-items: center;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         .editor-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             background: white;
             padding: 15px;
             border-radius: 12px;
@@ -36,216 +35,166 @@
         }
 
         h2 {
-            margin-top: 0;
+            margin: 0 0 15px 0;
             color: #333;
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 0.8rem;
             color: #555;
         }
 
-        input, textarea, select {
+        input, textarea {
             width: 100%;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             box-sizing: border-box;
         }
 
         textarea {
             resize: vertical;
-            height: 80px;
+            height: 70px;
         }
 
         .row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .col {
             flex: 1;
         }
 
-        .file-input-wrapper {
-            background-color: #e3faf2;
-            border: 2px dashed var(--green-color);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
         }
 
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-
         button {
-            flex: 1;
+            width: 100%;
             padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
+            color: white;
         }
 
         .btn-update {
             background-color: var(--primary-color);
-            color: white;
         }
 
-        .btn-download {
+        .btn-share {
             background-color: var(--green-color);
-            color: white;
+            font-size: 1.05rem;
         }
 
-        .btn-print {
-            background-color: #2d3748;
-            color: white;
-        }
-
-        /* Responsive container preserving visual aspects */
+        /* Screen Preview Container */
         .prescription-wrapper {
             position: relative;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             aspect-ratio: 3072 / 4096;
-            background-color: #e5e5e5;
+            background-color: #fff;
+            background-image: url('prescription1.jpg'); /* Your default template path */
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             border-radius: 4px;
             overflow: hidden;
             container-type: inline-size;
             container-name: prescription;
         }
 
-        .placeholder-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #666;
-            text-align: center;
-            font-weight: bold;
-            width: 80%;
-            pointer-events: none;
-        }
-
         .overlay {
             position: absolute;
             color: var(--blue-ink);
-            font-family: 'Reenie Beanie', cursive;
-            font-weight: 500;
-            line-height: 1.2;
+            font-family: 'Comic Sans MS', cursive, sans-serif; 
+            font-weight: bold;
+            line-height: 1.3;
             white-space: pre-wrap;
             cursor: move;
-            display: none;
             touch-action: none;
             padding: 4px;
-            border: 1px dashed rgba(0,0,0,0.15);
+            border: 1px dashed rgba(16, 42, 115, 0.3);
+            background-color: rgba(255, 255, 255, 0.45);
+            border-radius: 4px;
         }
 
-        /* Default drag placements */
-        #outName   { left: 17%; top: 20.2%; font-size: 5.2cqw; }
-        #outAge    { left: 56%; top: 20.2%; font-size: 4.8cqw; }
-        #outSex    { left: 17%; top: 22.4%; font-size: 4.8cqw; }
-        #outDate   { left: 56%; top: 22.4%; font-size: 4.5cqw; }
-        #outVitals { left: 8%;  top: 32.0%; font-size: 4.0cqw; line-height: 1.8; }
-        #outMeds   { left: 45%; top: 32.0%; font-size: 4.3cqw; line-height: 2.1; }
+        /* Initial visual layout percentages */
+        #outName   { left: 17%; top: 20.2%; font-size: 5.0cqw; }
+        #outAge    { left: 56%; top: 20.2%; font-size: 4.6cqw; }
+        #outSex    { left: 17%; top: 22.4%; font-size: 4.6cqw; }
+        #outDate   { left: 56%; top: 22.4%; font-size: 4.3cqw; }
+        #outVitals { left: 8%;  top: 32.0%; font-size: 3.8cqw; line-height: 1.8; width: 30%; }
+        #outMeds   { left: 45%; top: 32.0%; font-size: 4.1cqw; line-height: 2.1; width: 50%; }
 
-        /* Mobile Safe Long-Press Image Modal */
-        .image-modal {
+        /* WebView Fullscreen Safe Fallback Overlay */
+        .fullscreen-preview {
             display: none;
             position: fixed;
-            z-index: 99999;
+            z-index: 999999;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            box-sizing: border-box;
-            padding: 15px;
+            background-color: rgba(0,0,0,0.95);
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
-        .modal-instructions {
-            color: #fff;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 8px 12px;
-            border-radius: 8px;
-            max-width: 90%;
-        }
-
-        .modal-content {
+        .fullscreen-preview img {
             max-width: 100%;
-            max-height: 70vh;
-            border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-bottom: 15px;
+            max-height: 80vh;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             user-select: contain !important;
             -webkit-user-select: contain !important;
         }
 
-        .btn-close-modal {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 30px;
+        .preview-instructions {
+            color: #fff;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
             border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            flex: none;
-            width: auto;
         }
 
-        @media print {
-            .editor-container, .image-modal { display: none !important; }
-            body { padding: 0; margin: 0; }
-            .prescription-wrapper {
-                box-shadow: none !important;
-                width: 100vw !important;
-                height: 133.33vw !important;
-                position: absolute !important;
-                top: 0; left: 0;
-            }
+        .btn-close {
+            margin-top: 15px;
+            background-color: var(--primary-color);
+            width: auto;
+            padding: 10px 30px;
         }
     </style>
 </head>
 <body>
 
     <div class="editor-container">
-        <h2>Koushik Clinic Prescription Maker</h2>
+        <h2>Koushik Clinic Creator</h2>
         
-        <div class="file-input-wrapper">
-            <label style="color:#27ae60; margin-bottom:5px;">Step 1: Choose your blank prescription template image</label>
+        <div class="form-group">
+            <label>Template Background Image Loader (Optional):</label>
             <input type="file" id="imageLoader" accept="image/*" onchange="loadImage(event)">
         </div>
 
@@ -280,27 +229,6 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
-                        <label for="fontSelect">Handwriting Font Style</label>
-                        <select id="fontSelect" onchange="changeFont(this.value)">
-                            <option value="'Reenie Beanie', cursive">Fast Clinical Script</option>
-                            <option value="'Nothing You Could Do', cursive">Relaxed Blue Ink</option>
-                            <option value="'Over the Rainbow', cursive">Compact Felt Tip Pen</option>
-                            <option value="'Herr Von Muellerhoff', cursive">Classic Sharp Cursive</option>
-                            <option value="'League Script', sans-serif">Slanted Fine-Tip Pen</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
-                        <label for="fontSizeSlider">Font Size Scale</label>
-                        <input type="range" id="fontSizeSlider" min="3" max="7" step="0.1" value="4.8" oninput="changeFontSize(this.value)">
-                    </div>
-                </div>
-            </div>
-
             <div class="form-group">
                 <label for="inVitals">Symptoms / Vitals (Left Side)</label>
                 <textarea id="inVitals">Fever - 3 Days&#10;BP: 120/80&#10;Pulse: 78</textarea>
@@ -312,39 +240,32 @@
             </div>
 
             <div class="btn-group">
-                <button type="submit" class="btn-update">Update Text</button>
-                <div class="btn-row">
-                    <button type="button" class="btn-download" onclick="generatePrescriptionNative()">Save to Phone</button>
-                    <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
-                </div>
+                <button type="submit" class="btn-update">Update Screen Layout</button>
+                <button type="button" class="btn-share" onclick="shareOrSavePrescription()">📤 SEND / SAVE PRESCRIPTION</button>
             </div>
         </form>
     </div>
 
     <div class="prescription-wrapper" id="previewWrapper">
-        <div class="placeholder-text" id="placeholderText">
-            Please choose your 'blank-prescription' image above to begin editing.
-        </div>
-        <div id="outName" class="overlay draggable" data-rel-size="5.2"></div>
-        <div id="outAge" class="overlay draggable" data-rel-size="4.8"></div>
-        <div id="outSex" class="overlay draggable" data-rel-size="4.8"></div>
-        <div id="outDate" class="overlay draggable" data-rel-size="4.5"></div>
-        <div id="outVitals" class="overlay draggable" data-rel-size="4.0" style="line-height: 1.8;"></div>
-        <div id="outMeds" class="overlay draggable" data-rel-size="4.3" style="line-height: 2.1;"></div>
+        <div id="outName" class="overlay draggable"></div>
+        <div id="outAge" class="overlay draggable"></div>
+        <div id="outSex" class="overlay draggable"></div>
+        <div id="outDate" class="overlay draggable"></div>
+        <div id="outVitals" class="overlay draggable"></div>
+        <div id="outMeds" class="overlay draggable"></div>
     </div>
 
-    <div id="downloadModal" class="image-modal">
-        <div class="modal-instructions">
-            📸 <strong>Prescription Generated Successfully!</strong><br>
-            <strong>Hold down (long-press)</strong> on the image below, then choose <strong>"Download Image"</strong> or <strong>"Save Image"</strong>.
+    <div id="previewModal" class="fullscreen-preview">
+        <div class="preview-instructions">
+            📸 <strong>Prescription Ready!</strong><br>
+            Please <strong>long-press (hold)</strong> the image to save it, or take a <strong>screenshot</strong>.
         </div>
-        <img id="modalImage" class="modal-content" alt="Generated Prescription">
-        <button class="btn-close-modal" onclick="closeModal()">Go Back</button>
+        <img id="fallbackImage" alt="Prescription Output">
+        <button type="button" class="btn-close" onclick="closePreview()">Go Back</button>
     </div>
 
     <script>
-        let uploadedImgObj = null; // Global image object to draw natively
-        let currentFontFamily = "'Reenie Beanie', cursive";
+        let templateImageSrc = 'prescription1.jpg'; // Keeps track of loaded image source
 
         window.onload = function() {
             const today = new Date();
@@ -352,27 +273,21 @@
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const yyyy = today.getFullYear();
             document.getElementById("inDate").value = `${dd}/${mm}/${yyyy}`;
+            
+            updatePrescription();
             initDragAndDrop();
         };
 
         function loadImage(event) {
             const reader = new FileReader();
             reader.onload = function() {
-                // Set background preview
-                const wrapper = document.getElementById('previewWrapper');
-                wrapper.style.backgroundImage = `url('${reader.result}')`;
-                
-                // Load into native Image object safely
-                uploadedImgObj = new Image();
-                uploadedImgObj.src = reader.result;
-
-                document.getElementById('placeholderText').style.display = 'none';
-                const overlays = document.querySelectorAll('.overlay');
-                overlays.forEach(el => el.style.display = 'block');
-                
+                templateImageSrc = reader.result;
+                document.getElementById('previewWrapper').style.backgroundImage = `url('${templateImageSrc}')`;
                 updatePrescription();
             }
-            reader.readAsDataURL(event.target.files[0]);
+            if (event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
         }
 
         function updatePrescription() {
@@ -384,100 +299,97 @@
             document.getElementById("outMeds").textContent = document.getElementById("inMeds").value;
         }
 
-        function changeFont(fontFamily) {
-            currentFontFamily = fontFamily;
-            const overlays = document.querySelectorAll('.overlay');
-            overlays.forEach(el => el.style.fontFamily = fontFamily);
-        }
+        // Generates the canvas and either shares or renders it in a WebView-safe overlay
+        function shareOrSavePrescription() {
+            const bgImg = new Image();
+            bgImg.crossOrigin = "anonymous";
+            bgImg.src = templateImageSrc;
 
-        function changeFontSize(val) {
-            const parsedVal = parseFloat(val);
-            document.getElementById("outName").setAttribute('data-rel-size', parsedVal);
-            document.getElementById("outAge").setAttribute('data-rel-size', parsedVal - 0.4);
-            document.getElementById("outSex").setAttribute('data-rel-size', parsedVal - 0.4);
-            document.getElementById("outDate").setAttribute('data-rel-size', parsedVal - 0.7);
-            document.getElementById("outVitals").setAttribute('data-rel-size', parsedVal - 1.2);
-            document.getElementById("outMeds").setAttribute('data-rel-size', parsedVal - 0.9);
-
-            document.getElementById("outName").style.fontSize = parsedVal + "cqw";
-            document.getElementById("outAge").style.fontSize = (parsedVal - 0.4) + "cqw";
-            document.getElementById("outSex").style.fontSize = (parsedVal - 0.4) + "cqw";
-            document.getElementById("outDate").style.fontSize = (parsedVal - 0.7) + "cqw";
-            document.getElementById("outVitals").style.fontSize = (parsedVal - 1.2) + "cqw";
-            document.getElementById("outMeds").style.fontSize = (parsedVal - 0.9) + "cqw";
-        }
-
-        // Native canvas rendering (Crash-proof and runs completely offline)
-        function generatePrescriptionNative() {
-            if (!uploadedImgObj) {
-                alert("Please upload your blank template image first.");
-                return;
-            }
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            // Set canvas size matching the original template image resolution (e.g. 3072x4096)
-            canvas.width = uploadedImgObj.naturalWidth;
-            canvas.height = uploadedImgObj.naturalHeight;
-
-            // Draw template background
-            ctx.drawImage(uploadedImgObj, 0, 0, canvas.width, canvas.height);
-
-            const container = document.getElementById('previewWrapper');
-            const containerRect = container.getBoundingClientRect();
-            const overlays = document.querySelectorAll('.overlay');
-
-            overlays.forEach(el => {
-                const rect = el.getBoundingClientRect();
+            bgImg.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
                 
-                // Calculate percentage relative coordinates from the screen editor
-                const pctX = ((rect.left - containerRect.left) / containerRect.width);
-                const pctY = ((rect.top - containerRect.top) / containerRect.height);
+                canvas.width = bgImg.naturalWidth || 1536;
+                canvas.height = bgImg.naturalHeight || 2048;
 
-                // Map percentages back to the high-res canvas scale
-                const canvasX = pctX * canvas.width;
-                const canvasY = pctY * canvas.height;
+                // Draw background template
+                ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
-                // Grab custom sizes
-                const relSize = parseFloat(el.getAttribute('data-rel-size') || '4.5');
-                const canvasFontSize = (relSize / 100) * canvas.width; // font sizes scale relative to template width
+                const container = document.getElementById('previewWrapper');
+                const containerRect = container.getBoundingClientRect();
+                const overlays = document.querySelectorAll('.overlay');
 
-                // Apply style
-                ctx.fillStyle = '#102a73'; // Ink Blue
-                ctx.font = `500 ${canvasFontSize}px ${currentFontFamily}`;
-                ctx.textBaseline = "top";
+                overlays.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const pctX = (rect.left - containerRect.left) / containerRect.width;
+                    const pctY = (rect.top - containerRect.top) / containerRect.height;
 
-                // Handle multi-line writing
-                const lines = el.textContent.split('\n');
-                let lineSpacingMultiplier = 1.3;
-                if (el.id === 'outVitals') lineSpacingMultiplier = 1.8;
-                if (el.id === 'outMeds') lineSpacingMultiplier = 2.1;
+                    const canvasX = pctX * canvas.width;
+                    const canvasY = pctY * canvas.height;
 
-                const computedLineHeight = canvasFontSize * lineSpacingMultiplier;
+                    // Relative scale font sizes based on canvas width
+                    const baseFontSizePct = el.id.includes('Name') ? 0.05 : 0.042; 
+                    const canvasFontSize = baseFontSizePct * canvas.width;
 
-                lines.forEach((line, index) => {
-                    ctx.fillText(line, canvasX, canvasY + (index * computedLineHeight));
+                    ctx.fillStyle = '#102a73'; // Indigo/Ink Blue
+                    ctx.font = `bold ${canvasFontSize}px 'Comic Sans MS', sans-serif`;
+                    ctx.textBaseline = "top";
+
+                    const lines = el.textContent.split('\n');
+                    let lineSpacingMultiplier = 1.3;
+                    if (el.id === 'outVitals') lineSpacingMultiplier = 1.8;
+                    if (el.id === 'outMeds') lineSpacingMultiplier = 2.1;
+
+                    const computedLineHeight = canvasFontSize * lineSpacingMultiplier;
+
+                    lines.forEach((line, idx) => {
+                        ctx.fillText(line, canvasX, canvasY + (idx * computedLineHeight));
+                    });
                 });
-            });
 
-            // Convert to a base64 JPEG safely
-            try {
-                const imgData = canvas.toDataURL('image/jpeg', 0.9);
-                const modalImg = document.getElementById('modalImage');
-                modalImg.src = imgData;
+                // Convert Canvas to a real file object and try to Share
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
+                        return;
+                    }
 
-                // Show modal window
-                document.getElementById('downloadModal').style.display = 'flex';
-            } catch (err) {
-                alert("Failed to render the image canvas locally: " + err.message);
-            }
+                    const file = new File([blob], "prescription.jpg", { type: "image/jpeg" });
+
+                    // Web Share API Check (WebView Friendly)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            files: [file],
+                            title: 'Patient Prescription',
+                            text: 'Prescription generated from Koushik Clinic Assistant.'
+                        })
+                        .catch(() => {
+                            // If share fails or gets canceled, open the fallback preview screen
+                            showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
+                        });
+                    } else {
+                        // Fallback for older wrappers/WebViews that do not support Web Share
+                        showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
+                    }
+                }, 'image/jpeg', 0.95);
+            };
+
+            bgImg.onerror = function() {
+                alert("Failed to load the background template image. Ensure the image is accessible.");
+            };
         }
 
-        function closeModal() {
-            document.getElementById('downloadModal').style.display = 'none';
+        // Show Fullscreen WebView-safe container 
+        function showFallbackPreview(dataUrl) {
+            document.getElementById('fallbackImage').src = dataUrl;
+            document.getElementById('previewModal').style.display = 'flex';
         }
 
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // WebView Compatible Drag Logic
         function initDragAndDrop() {
             const draggables = document.querySelectorAll('.draggable');
             const container = document.getElementById('previewWrapper');
@@ -486,9 +398,7 @@
                 let isDragging = false;
                 let startX, startY, initialLeft, initialTop;
 
-                // Desktop events
                 el.addEventListener('mousedown', startDrag);
-                // Mobile finger drag events
                 el.addEventListener('touchstart', startDrag, { passive: false });
 
                 function startDrag(e) {
@@ -524,7 +434,6 @@
                     const leftPercent = (currentLeftPx / containerRect.width) * 100;
                     const topPercent = (currentTopPx / containerRect.height) * 100;
 
-                    // Bound checking limits
                     el.style.left = Math.max(0, Math.min(leftPercent, 90)) + '%';
                     el.style.top = Math.max(0, Math.min(topPercent, 95)) + '%';
                 }
