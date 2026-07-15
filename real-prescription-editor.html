@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Koushik Clinic - Drag & Drop Prescription Editor</title>
     <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Herr+Von+Muellerhoff&family=Over+the+Rainbow&family=League+Script&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         :root {
             --primary-color: #e0533c;
             --blue-ink: #102a73;
+            --green-color: #2ecc71;
         }
 
         body {
@@ -78,7 +82,7 @@
 
         .file-input-wrapper {
             background-color: #e3faf2;
-            border: 2px dashed #2ecc71;
+            border: 2px dashed var(--green-color);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
@@ -87,8 +91,15 @@
 
         .btn-group {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             margin-top: 15px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
         }
 
         button {
@@ -104,6 +115,11 @@
 
         .btn-update {
             background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-download {
+            background-color: var(--green-color);
             color: white;
         }
 
@@ -147,7 +163,6 @@
         .overlay {
             position: absolute;
             color: var(--blue-ink);
-            /* Set default font to 'Reenie Beanie' for realistic doctor handwriting look */
             font-family: 'Reenie Beanie', cursive;
             font-weight: 500;
             line-height: 1.2;
@@ -165,7 +180,6 @@
             background: rgba(224, 83, 60, 0.05);
         }
 
-        /* cqw used for bulletproof alignment in both print and layout */
         #outName   { left: 17%; top: 20.2%; font-size: 5.2cqw; }
         #outAge    { left: 56%; top: 20.2%; font-size: 4.8cqw; }
         #outSex    { left: 17%; top: 22.4%; font-size: 4.8cqw; }
@@ -217,7 +231,7 @@
 <body>
 
     <div class="editor-container">
-        <h2>Koushik  Clinic Assistant Website </h2>
+        <h2>Koushik Clinic Assistant Website</h2>
         
         <div class="file-input-wrapper">
             <label style="color:#27ae60; margin-bottom:5px;">Step 1: Choose your blank-prescription.jpg</label>
@@ -288,7 +302,10 @@
 
             <div class="btn-group">
                 <button type="submit" class="btn-update">Update Text</button>
-                <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
+                <div class="btn-row">
+                    <button type="button" class="btn-download" onclick="downloadPrescription()">Save to Phone</button>
+                    <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
+                </div>
             </div>
         </form>
     </div>
@@ -352,6 +369,44 @@
             document.getElementById("outDate").style.fontSize = (parsedVal - 0.7) + "cqw";
             document.getElementById("outVitals").style.fontSize = (parsedVal - 1.2) + "cqw";
             document.getElementById("outMeds").style.fontSize = (parsedVal - 0.9) + "cqw";
+        }
+
+        function downloadPrescription() {
+            const container = document.getElementById('previewWrapper');
+            
+            const hasBg = container.style.backgroundImage !== '';
+            if(!hasBg) {
+                alert("Please upload your blank template image first.");
+                return;
+            }
+
+            // Temporarily hide dotted border outline on elements during capture
+            const overlays = document.querySelectorAll('.overlay');
+            overlays.forEach(el => {
+                el.style.border = 'none';
+            });
+
+            html2canvas(container, {
+                useCORS: true,
+                scale: 3, // High-quality rendering output
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const patientName = document.getElementById("inName").value.trim() || "patient";
+                link.download = `Prescription_${patientName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Restore original styling for editing
+                overlays.forEach(el => {
+                    el.style.border = '1px dashed transparent';
+                });
+            }).catch(err => {
+                console.error("Canvas export failed: ", err);
+                alert("Failed to render prescription image.");
+            });
         }
 
         function initDragAndDrop() {
