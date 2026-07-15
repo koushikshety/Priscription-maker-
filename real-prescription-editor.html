@@ -55,7 +55,7 @@
             line-height: 1.4;
         }
 
-        .btn-notice-redirect {
+        .btn-notice-copy {
             background-color: var(--notice-text);
             color: white;
             padding: 10px 18px;
@@ -71,8 +71,8 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
 
-        .btn-notice-redirect:hover {
-            background-color: #9b2c2c;
+        .btn-notice-copy.success {
+            background-color: var(--green-color);
         }
 
         .editor-container {
@@ -302,11 +302,10 @@
 </head>
 <body>
 
-    <!-- Dynamic Forced App Redirect Bypass Notification System -->
     <div class="wrapper-notice-bar">
-        <p>⚠️ App Error, Layout Glitch, or Image Load Failure?</p>
-        <button type="button" class="btn-notice-redirect" onclick="forceSystemBrowserOpen()">
-            🌐 Launch Main Website in Phone Chrome / Safari
+        <p>⚠️ App Error, Layout Glitch, or Loading Issues?</p>
+        <button type="button" id="copyBtn" class="btn-notice-copy" onclick="copyWebsiteLink()">
+            📋 Copy Website Link
         </button>
     </div>
 
@@ -367,7 +366,6 @@
         <div id="outMeds" class="overlay draggable"></div>
     </div>
 
-    <!-- Screen-Fitting Modal Container for Clean Capture -->
     <div id="snapshotModal" class="fullscreen-snapshot-view">
         <div class="snapshot-top-instructions">
             📸 FULLSCREEN READY: Capture your device screenshot now.
@@ -383,92 +381,10 @@
             initDragAndDrop();
         };
 
-        // Forces the application wrapper to yield layout command threads to Chrome or Safari directly
-        function forceSystemBrowserOpen() {
-            const mainTargetUrl = "https://koushikshety.github.io/Priscription-maker-/real-prescription-editor.html";
-            
-            // Tries multiple execution parameters to punch out of a locked app wrapper frame
-            const systemWindow = window.open(mainTargetUrl, '_system');
-            if (!systemWindow) {
-                const blankWindow = window.open(mainTargetUrl, '_blank');
-                if(!blankWindow) {
-                    window.location.href = mainTargetUrl;
-                }
-            }
-        }
+        // Copies the destination URL to the clipboard using native & hybrid fallback logic
+        function copyWebsiteLink() {
+            const urlToCopy = "https://koushikshety.github.io/Priscription-maker-/real-prescription-editor.html";
+            const btn = document.getElementById("copyBtn");
 
-        function loadImage(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                document.getElementById('previewWrapper').style.backgroundImage = `url('${reader.result}')`;
-                document.getElementById('placeholderText').style.display = 'none';
-                document.querySelectorAll('.overlay').forEach(el => el.style.display = 'block');
-                updatePrescription();
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        function updatePrescription() {
-            document.getElementById("outName").textContent = document.getElementById("inName").value;
-            document.getElementById("outAge").textContent = document.getElementById("inAge").value;
-            document.getElementById("outSex").textContent = document.getElementById("inSex").value;
-            document.getElementById("outDate").textContent = document.getElementById("inDate").value;
-            document.getElementById("outVitals").textContent = document.getElementById("inVitals").value;
-            document.getElementById("outMeds").textContent = document.getElementById("inMeds").value;
-        }
-
-        function changeFont(f) { document.querySelectorAll('.overlay').forEach(el => el.style.fontFamily = f); }
-        function changeFontSize(v) { document.querySelectorAll('.overlay').forEach(el => el.style.fontSize = v + "cqw"); }
-
-        function openCleanFullscreenSnapshot() {
-            const wrapper = document.getElementById('previewWrapper');
-            if(wrapper.style.backgroundImage === '') { 
-                alert("Please add a background prescription canvas template image to proceed."); 
-                return; 
-            }
-
-            document.querySelectorAll('.overlay').forEach(el => el.style.border = 'none');
-
-            html2canvas(wrapper, {
-                useCORS: true,
-                scale: 3, 
-                backgroundColor: null
-            }).then(canvas => {
-                const clearImageDataUrl = canvas.toDataURL('image/jpeg', 1.0);
-                
-                document.getElementById('cleanRenderOutput').src = clearImageDataUrl;
-                document.getElementById('snapshotModal').style.display = 'flex';
-                
-                document.querySelectorAll('.overlay').forEach(el => el.style.border = '1px dashed transparent');
-            });
-        }
-
-        function closeSnapshotView() {
-            document.getElementById('snapshotModal').style.display = 'none';
-        }
-
-        function initDragAndDrop() {
-            document.querySelectorAll('.draggable').forEach(el => {
-                let isDragging = false; let startX, startY, initialLeft, initialTop;
-                
-                const startDrag = (e) => {
-                    isDragging = true; const ev = e.touches ? e.touches[0] : e;
-                    startX = ev.clientX; startY = ev.clientY;
-                    initialLeft = el.offsetLeft; initialTop = el.offsetTop;
-                    document.addEventListener('mousemove', dragMove); document.addEventListener('touchmove', dragMove, {passive:false});
-                };
-                
-                const dragMove = (e) => {
-                    if (!isDragging) return; e.preventDefault();
-                    const ev = e.touches ? e.touches[0] : e;
-                    const container = document.getElementById('previewWrapper');
-                    el.style.left = ((initialLeft + (ev.clientX - startX)) / container.offsetWidth * 100) + '%';
-                    el.style.top = ((initialTop + (ev.clientY - startY)) / container.offsetHeight * 100) + '%';
-                };
-                
-                el.addEventListener('mousedown', startDrag); el.addEventListener('touchstart', startDrag, {passive:false});
-            });
-        }
-    </script>
-</body>
-</html>
+            // Attempt modern clipboard write
+            if (navigator.
