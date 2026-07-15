@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koushik Clinic - WebView Compatible</title>
+    <title>Koushik Clinic - Drag & Drop Prescription Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Nothing+You+Could+Do&family=Herr+Von+Muellerhoff&family=Over+the+Rainbow&family=League+Script&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         :root {
             --primary-color: #e0533c;
             --blue-ink: #102a73;
             --green-color: #2ecc71;
+            --whatsapp-color: #25d366;
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f3f4f6;
             margin: 0;
             padding: 10px;
@@ -20,12 +25,11 @@
             flex-direction: column;
             align-items: center;
             user-select: none;
-            -webkit-user-select: none;
         }
 
         .editor-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background: white;
             padding: 15px;
             border-radius: 12px;
@@ -35,166 +39,283 @@
         }
 
         h2 {
-            margin: 0 0 15px 0;
+            margin-top: 0;
             color: #333;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 3px;
-            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
             color: #555;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             box-sizing: border-box;
         }
 
         textarea {
             resize: vertical;
-            height: 70px;
+            height: 80px;
+            font-family: monospace;
         }
 
         .row {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .col {
             flex: 1;
         }
 
+        .file-input-wrapper {
+            background-color: #e3faf2;
+            border: 2px dashed var(--green-color);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             margin-top: 15px;
         }
 
-        button {
+        .btn-row {
+            display: flex;
+            gap: 10px;
             width: 100%;
+        }
+
+        button {
+            flex: 1;
             padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            color: white;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-update {
             background-color: var(--primary-color);
+            color: white;
         }
 
         .btn-share {
-            background-color: var(--green-color);
-            font-size: 1.05rem;
+            background-color: var(--whatsapp-color);
+            color: white;
         }
 
-        /* Screen Preview Container */
+        .btn-print {
+            background-color: #2d3748;
+            color: white;
+        }
+
+        .btn-fallback {
+            background-color: #3182ce;
+            color: white;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+
         .prescription-wrapper {
             position: relative;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             aspect-ratio: 3072 / 4096;
-            background-color: #fff;
-            background-image: url('prescription1.jpg'); /* Your default template path */
+            background-color: #e5e5e5;
             background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             border-radius: 4px;
             overflow: hidden;
+            
             container-type: inline-size;
             container-name: prescription;
+            
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .placeholder-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            text-align: center;
+            font-weight: bold;
+            width: 80%;
+            pointer-events: none;
         }
 
         .overlay {
             position: absolute;
             color: var(--blue-ink);
-            font-family: 'Comic Sans MS', cursive, sans-serif; 
-            font-weight: bold;
-            line-height: 1.3;
+            font-family: 'Reenie Beanie', cursive;
+            font-weight: 500;
+            line-height: 1.2;
             white-space: pre-wrap;
+            transform: rotate(-0.5deg);
             cursor: move;
+            display: none;
             touch-action: none;
             padding: 4px;
-            border: 1px dashed rgba(16, 42, 115, 0.3);
-            background-color: rgba(255, 255, 255, 0.45);
-            border-radius: 4px;
+            border: 1px dashed transparent;
         }
 
-        /* Initial visual layout percentages */
-        #outName   { left: 17%; top: 20.2%; font-size: 5.0cqw; }
-        #outAge    { left: 56%; top: 20.2%; font-size: 4.6cqw; }
-        #outSex    { left: 17%; top: 22.4%; font-size: 4.6cqw; }
-        #outDate   { left: 56%; top: 22.4%; font-size: 4.3cqw; }
-        #outVitals { left: 8%;  top: 32.0%; font-size: 3.8cqw; line-height: 1.8; width: 30%; }
-        #outMeds   { left: 45%; top: 32.0%; font-size: 4.1cqw; line-height: 2.1; width: 50%; }
+        .overlay:active {
+            border: 1px dashed var(--primary-color);
+            background: rgba(224, 83, 60, 0.05);
+        }
 
-        /* WebView Fullscreen Safe Fallback Overlay */
-        .fullscreen-preview {
+        #outName   { left: 17%; top: 20.2%; font-size: 5.2cqw; }
+        #outAge    { left: 56%; top: 20.2%; font-size: 4.8cqw; }
+        #outSex    { left: 17%; top: 22.4%; font-size: 4.8cqw; }
+        #outDate   { left: 56%; top: 22.4%; font-size: 4.5cqw; }
+        #outVitals { left: 8%;  top: 32.0%; font-size: 4.0cqw; line-height: 1.8; }
+        #outMeds   { left: 45%; top: 32.0%; font-size: 4.3cqw; line-height: 2.1; }
+
+        /* Safe Mobile Preview Modal (Zero-Crash Download Bypass) */
+        .image-modal {
             display: none;
             position: fixed;
-            z-index: 999999;
+            z-index: 9999;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.95);
+            background-color: rgba(0,0,0,0.9);
+            box-sizing: border-box;
+            padding: 15px;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
-            box-sizing: border-box;
+            user-select: contain;
+            -webkit-user-select: contain;
         }
 
-        .fullscreen-preview img {
+        .modal-content {
             max-width: 100%;
-            max-height: 80vh;
-            border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            user-select: contain !important;
-            -webkit-user-select: contain !important;
+            max-height: 70vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 12px;
+            display: block;
+            user-select: auto !important;
+            -webkit-user-select: auto !important;
         }
 
-        .preview-instructions {
+        .modal-instructions {
             color: #fff;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             margin-bottom: 12px;
-            background: rgba(255,255,255,0.2);
+            line-height: 1.4;
+            background: rgba(255,255,255,0.1);
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
+            max-width: 500px;
         }
 
-        .btn-close {
-            margin-top: 15px;
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn-close-modal {
             background-color: var(--primary-color);
-            width: auto;
-            padding: 10px 30px;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .btn-modal-share {
+            background-color: var(--whatsapp-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            html, body {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            .editor-container, .image-modal {
+                display: none !important;
+            }
+            .prescription-wrapper {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 100vw !important;
+                height: 133.33vw !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+                
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .overlay {
+                display: block !important;
+                border: none !important;
+                background: none !important;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="editor-container">
-        <h2>Koushik Clinic Creator</h2>
+        <h2>Koushik Clinic Assistant</h2>
         
-        <div class="form-group">
-            <label>Template Background Image Loader (Optional):</label>
+        <div class="file-input-wrapper">
+            <label style="color:#27ae60; margin-bottom:5px;">Step 1: Choose your blank-prescription.jpg</label>
             <input type="file" id="imageLoader" accept="image/*" onchange="loadImage(event)">
         </div>
 
@@ -229,6 +350,27 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="fontSelect">Natural Handwritings Style</label>
+                        <select id="fontSelect" onchange="changeFont(this.value)">
+                            <option value="'Reenie Beanie', cursive">Fast Clinical Script (Realistic)</option>
+                            <option value="'Nothing You Could Do', cursive">Relaxed Blue Ink (Messy)</option>
+                            <option value="'Over the Rainbow', cursive">Compact Felt Tip Pen</option>
+                            <option value="'Herr Von Muellerhoff', cursive">Classic Sharp Cursive (Vintage)</option>
+                            <option value="'League Script', sans-serif">Slanted Fine-Tip Pen</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="fontSizeSlider">Global Font Size Scale</label>
+                        <input type="range" id="fontSizeSlider" min="3" max="7" step="0.1" value="4.8" oninput="changeFontSize(this.value)">
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="inVitals">Symptoms / Vitals (Left Side)</label>
                 <textarea id="inVitals">Fever - 3 Days&#10;BP: 120/80&#10;Pulse: 78</textarea>
@@ -240,13 +382,25 @@
             </div>
 
             <div class="btn-group">
-                <button type="submit" class="btn-update">Update Screen Layout</button>
-                <button type="button" class="btn-share" onclick="shareOrSavePrescription()">📤 SEND / SAVE PRESCRIPTION</button>
+                <button type="submit" class="btn-update">Update Text</button>
+                <div class="btn-row">
+                    <button type="button" class="btn-share" onclick="generatePrescriptionImage()">
+                        <i>📤</i> Send / Save Prescription
+                    </button>
+                    <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
+                </div>
+                
+                <button type="button" class="btn-fallback" onclick="openInExternalBrowser()">
+                    🌐 Open in Mobile Browser (Bypass Download Issues)
+                </button>
             </div>
         </form>
     </div>
 
     <div class="prescription-wrapper" id="previewWrapper">
+        <div class="placeholder-text" id="placeholderText">
+            Please tap the green button above and choose your 'blank-prescription.jpg' to begin editing.
+        </div>
         <div id="outName" class="overlay draggable"></div>
         <div id="outAge" class="overlay draggable"></div>
         <div id="outSex" class="overlay draggable"></div>
@@ -255,17 +409,22 @@
         <div id="outMeds" class="overlay draggable"></div>
     </div>
 
-    <div id="previewModal" class="fullscreen-preview">
-        <div class="preview-instructions">
-            📸 <strong>Prescription Ready!</strong><br>
-            Please <strong>long-press (hold)</strong> the image to save it, or take a <strong>screenshot</strong>.
+    <div id="downloadModal" class="image-modal">
+        <div class="modal-instructions">
+            📱 <strong>Save or Share Prescription</strong><br>
+            • Tap <strong>"Share Directly"</strong> to open WhatsApp, Email, or Drive.<br>
+            • Or, **Long-press (hold finger down)** on the image to save it.
         </div>
-        <img id="fallbackImage" alt="Prescription Output">
-        <button type="button" class="btn-close" onclick="closePreview()">Go Back</button>
+        <img id="modalImage" class="modal-content" alt="Prescription Output">
+        <div class="modal-buttons">
+            <button class="btn-modal-share" id="btnNativeShare" onclick="sharePrescription()">📤 Share Directly</button>
+            <button class="btn-close-modal" onclick="closeModal()">Go Back</button>
+        </div>
     </div>
 
     <script>
-        let templateImageSrc = 'prescription1.jpg'; // Keeps track of loaded image source
+        let currentBlob = null; // Store image blob for sharing
+        let base64DataUrl = "";  // Backup base64
 
         window.onload = function() {
             const today = new Date();
@@ -273,21 +432,22 @@
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const yyyy = today.getFullYear();
             document.getElementById("inDate").value = `${dd}/${mm}/${yyyy}`;
-            
-            updatePrescription();
             initDragAndDrop();
         };
 
         function loadImage(event) {
             const reader = new FileReader();
             reader.onload = function() {
-                templateImageSrc = reader.result;
-                document.getElementById('previewWrapper').style.backgroundImage = `url('${templateImageSrc}')`;
+                const wrapper = document.getElementById('previewWrapper');
+                wrapper.style.backgroundImage = `url('${reader.result}')`;
+                
+                document.getElementById('placeholderText').style.display = 'none';
+                const overlays = document.querySelectorAll('.overlay');
+                overlays.forEach(el => el.style.display = 'block');
+                
                 updatePrescription();
             }
-            if (event.target.files[0]) {
-                reader.readAsDataURL(event.target.files[0]);
-            }
+            reader.readAsDataURL(event.target.files[0]);
         }
 
         function updatePrescription() {
@@ -299,104 +459,116 @@
             document.getElementById("outMeds").textContent = document.getElementById("inMeds").value;
         }
 
-        // Generates the canvas and either shares or renders it in a WebView-safe overlay
-        function shareOrSavePrescription() {
-            const bgImg = new Image();
-            bgImg.crossOrigin = "anonymous";
-            bgImg.src = templateImageSrc;
+        function changeFont(fontFamily) {
+            const overlays = document.querySelectorAll('.overlay');
+            overlays.forEach(el => el.style.fontFamily = fontFamily);
+        }
 
-            bgImg.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+        function changeFontSize(val) {
+            const parsedVal = parseFloat(val);
+            document.getElementById("outName").style.fontSize = parsedVal + "cqw";
+            document.getElementById("outAge").style.fontSize = (parsedVal - 0.4) + "cqw";
+            document.getElementById("outSex").style.fontSize = (parsedVal - 0.4) + "cqw";
+            document.getElementById("outDate").style.fontSize = (parsedVal - 0.7) + "cqw";
+            document.getElementById("outVitals").style.fontSize = (parsedVal - 1.2) + "cqw";
+            document.getElementById("outMeds").style.fontSize = (parsedVal - 0.9) + "cqw";
+        }
+
+        // Bypasses local app downloads by forcing it open in Chrome/Safari
+        function openInExternalBrowser() {
+            window.open(window.location.href, '_system'); // standard webtoapp system link
+            window.open(window.location.href, '_blank');  // fallback tab
+        }
+
+        function generatePrescriptionImage() {
+            const container = document.getElementById('previewWrapper');
+            
+            const hasBg = container.style.backgroundImage !== '';
+            if(!hasBg) {
+                alert("Please upload your blank template image first.");
+                return;
+            }
+
+            // Hide dashed borders during image export
+            const overlays = document.querySelectorAll('.overlay');
+            overlays.forEach(el => el.style.border = 'none');
+
+            html2canvas(container, {
+                useCORS: true,
+                scale: 3, // High-res clarity
+                backgroundColor: null
+            }).then(canvas => {
+                base64DataUrl = canvas.toDataURL('image/png');
                 
-                canvas.width = bgImg.naturalWidth || 1536;
-                canvas.height = bgImg.naturalHeight || 2048;
+                const modalImg = document.getElementById('modalImage');
+                modalImg.src = base64DataUrl;
 
-                // Draw background template
-                ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+                // Convert base64 to file blob for Web Share API compatibility
+                canvas.toBlob((blob) => {
+                    currentBlob = blob;
+                }, 'image/png');
 
-                const container = document.getElementById('previewWrapper');
-                const containerRect = container.getBoundingClientRect();
-                const overlays = document.querySelectorAll('.overlay');
-
+                // Show action Modal
+                document.getElementById('downloadModal').style.display = 'flex';
+                
+                // Restore borders for design stage
                 overlays.forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    const pctX = (rect.left - containerRect.left) / containerRect.width;
-                    const pctY = (rect.top - containerRect.top) / containerRect.height;
-
-                    const canvasX = pctX * canvas.width;
-                    const canvasY = pctY * canvas.height;
-
-                    // Relative scale font sizes based on canvas width
-                    const baseFontSizePct = el.id.includes('Name') ? 0.05 : 0.042; 
-                    const canvasFontSize = baseFontSizePct * canvas.width;
-
-                    ctx.fillStyle = '#102a73'; // Indigo/Ink Blue
-                    ctx.font = `bold ${canvasFontSize}px 'Comic Sans MS', sans-serif`;
-                    ctx.textBaseline = "top";
-
-                    const lines = el.textContent.split('\n');
-                    let lineSpacingMultiplier = 1.3;
-                    if (el.id === 'outVitals') lineSpacingMultiplier = 1.8;
-                    if (el.id === 'outMeds') lineSpacingMultiplier = 2.1;
-
-                    const computedLineHeight = canvasFontSize * lineSpacingMultiplier;
-
-                    lines.forEach((line, idx) => {
-                        ctx.fillText(line, canvasX, canvasY + (idx * computedLineHeight));
-                    });
+                    el.style.border = '1px dashed transparent';
                 });
-
-                // Convert Canvas to a real file object and try to Share
-                canvas.toBlob(function(blob) {
-                    if (!blob) {
-                        showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
-                        return;
-                    }
-
-                    const file = new File([blob], "prescription.jpg", { type: "image/jpeg" });
-
-                    // Web Share API Check (WebView Friendly)
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share({
-                            files: [file],
-                            title: 'Patient Prescription',
-                            text: 'Prescription generated from Koushik Clinic Assistant.'
-                        })
-                        .catch(() => {
-                            // If share fails or gets canceled, open the fallback preview screen
-                            showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
-                        });
-                    } else {
-                        // Fallback for older wrappers/WebViews that do not support Web Share
-                        showFallbackPreview(canvas.toDataURL('image/jpeg', 0.95));
-                    }
-                }, 'image/jpeg', 0.95);
-            };
-
-            bgImg.onerror = function() {
-                alert("Failed to load the background template image. Ensure the image is accessible.");
-            };
+            }).catch(err => {
+                console.error("Image render failed: ", err);
+                alert("Render failed. Use the browser redirect bypass button below.");
+            });
         }
 
-        // Show Fullscreen WebView-safe container 
-        function showFallbackPreview(dataUrl) {
-            document.getElementById('fallbackImage').src = dataUrl;
-            document.getElementById('previewModal').style.display = 'flex';
+        // Uses system-level sharing menu (Bypasses WebView blockages completely)
+        async function sharePrescription() {
+            if (!currentBlob) {
+                alert("Image preparing, please try again in a second.");
+                return;
+            }
+
+            try {
+                const file = new File([currentBlob], "Prescription.png", { type: "image/png" });
+                
+                // Check if device supports sharing file files (modern phones)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Prescription Detail',
+                        text: 'Prescription created via Koushik Clinic.'
+                    });
+                } else if (navigator.share) {
+                    // Fallback to text url share
+                    await navigator.share({
+                        title: 'Prescription Detail',
+                        text: 'Check your prescription inside your browser files.'
+                    });
+                } else {
+                    // Manual fallbacks if sharing API is locked/restricted
+                    const fallbackEmail = `mailto:?subject=Patient Prescription&body=Name: ${document.getElementById("inName").value}%0D%0AMedication: ${encodeURIComponent(document.getElementById("inMeds").value)}`;
+                    window.location.href = fallbackEmail;
+                }
+            } catch (error) {
+                console.log('Share failed, attempting backup share...', error);
+                // Secondary backup: Launch default mail compose
+                const mailBackup = `mailto:?subject=Clinic Prescription&body=Prescription text updated: ${encodeURIComponent(document.getElementById("inMeds").value)}`;
+                window.location.href = mailBackup;
+            }
         }
 
-        function closePreview() {
-            document.getElementById('previewModal').style.display = 'none';
+        function closeModal() {
+            document.getElementById('downloadModal').style.display = 'none';
         }
 
-        // WebView Compatible Drag Logic
         function initDragAndDrop() {
             const draggables = document.querySelectorAll('.draggable');
             const container = document.getElementById('previewWrapper');
 
             draggables.forEach(el => {
                 let isDragging = false;
-                let startX, startY, initialLeft, initialTop;
+                let startX, startY;
+                let initialLeft, initialTop;
 
                 el.addEventListener('mousedown', startDrag);
                 el.addEventListener('touchstart', startDrag, { passive: false });
@@ -434,8 +606,8 @@
                     const leftPercent = (currentLeftPx / containerRect.width) * 100;
                     const topPercent = (currentTopPx / containerRect.height) * 100;
 
-                    el.style.left = Math.max(0, Math.min(leftPercent, 90)) + '%';
-                    el.style.top = Math.max(0, Math.min(topPercent, 95)) + '%';
+                    el.style.left = leftPercent + '%';
+                    el.style.top = topPercent + '%';
                 }
 
                 function stopDrag() {
