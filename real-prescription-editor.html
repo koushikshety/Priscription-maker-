@@ -36,39 +36,39 @@
             max-width: 600px;
             background-color: var(--notice-bg);
             border: 1px solid var(--notice-border);
-            padding: 10px 12px;
+            padding: 12px;
             border-radius: 8px;
             margin-bottom: 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             text-align: center;
         }
 
         .wrapper-notice-bar p {
             margin: 0;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             color: var(--notice-text);
-            font-weight: 500;
-            line-height: 1.3;
+            font-weight: bold;
+            line-height: 1.4;
         }
 
         .btn-notice-redirect {
             background-color: var(--notice-text);
             color: white;
-            padding: 6px 14px;
-            font-size: 0.78rem;
+            padding: 10px 18px;
+            font-size: 0.85rem;
             font-weight: bold;
             border: none;
-            border-radius: 4px;
-            text-decoration: none;
+            border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
 
         .btn-notice-redirect:hover {
@@ -302,11 +302,12 @@
 </head>
 <body>
 
+    <!-- Dynamic Forced App Redirect Bypass Notification System -->
     <div class="wrapper-notice-bar">
-        <p>⚠️ <strong>App Error or Layout Glitch?</strong> If sharing, loading, or editing features freeze inside your application wrapper, click below to open the tool safely in your device browser.</p>
-        <a href="https://koushikshety.github.io/Priscription-maker-/real-prescription-editor.html" target="_blank" class="btn-notice-redirect">
-            🌐 Open in Main Website Browser
-        </a>
+        <p>⚠️ App Error, Layout Glitch, or Image Load Failure?</p>
+        <button type="button" class="btn-notice-redirect" onclick="forceSystemBrowserOpen()">
+            🌐 Launch Main Website in Phone Chrome / Safari
+        </button>
     </div>
 
     <div class="editor-container">
@@ -366,6 +367,7 @@
         <div id="outMeds" class="overlay draggable"></div>
     </div>
 
+    <!-- Screen-Fitting Modal Container for Clean Capture -->
     <div id="snapshotModal" class="fullscreen-snapshot-view">
         <div class="snapshot-top-instructions">
             📸 FULLSCREEN READY: Capture your device screenshot now.
@@ -380,6 +382,20 @@
             document.getElementById("inDate").value = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
             initDragAndDrop();
         };
+
+        // Forces the application wrapper to yield layout command threads to Chrome or Safari directly
+        function forceSystemBrowserOpen() {
+            const mainTargetUrl = "https://koushikshety.github.io/Priscription-maker-/real-prescription-editor.html";
+            
+            // Tries multiple execution parameters to punch out of a locked app wrapper frame
+            const systemWindow = window.open(mainTargetUrl, '_system');
+            if (!systemWindow) {
+                const blankWindow = window.open(mainTargetUrl, '_blank');
+                if(!blankWindow) {
+                    window.location.href = mainTargetUrl;
+                }
+            }
+        }
 
         function loadImage(event) {
             const reader = new FileReader();
@@ -411,12 +427,11 @@
                 return; 
             }
 
-            // Hide guidelines temporarily to give a clean screenshot printout
             document.querySelectorAll('.overlay').forEach(el => el.style.border = 'none');
 
             html2canvas(wrapper, {
                 useCORS: true,
-                scale: 3, // Multiplies canvas texture details for a sharper image output
+                scale: 3, 
                 backgroundColor: null
             }).then(canvas => {
                 const clearImageDataUrl = canvas.toDataURL('image/jpeg', 1.0);
@@ -424,7 +439,6 @@
                 document.getElementById('cleanRenderOutput').src = clearImageDataUrl;
                 document.getElementById('snapshotModal').style.display = 'flex';
                 
-                // Restore configuration outlines back safely inside workspace card
                 document.querySelectorAll('.overlay').forEach(el => el.style.border = '1px dashed transparent');
             });
         }
